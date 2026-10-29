@@ -68,7 +68,7 @@ public class BookingService {
 
         // Rule 2: seeker's active bookings below the trust-tier max (FR-4.4 rule 2).
         long seekerActive = activeBookingCountForSeeker(seekerId);
-        if (seekerActive > seeker.getMaxConcurrentBookings()) {
+        if (seekerActive >= seeker.getMaxConcurrentBookings()) {
             throw new BookingRejectedException("Seeker booking limit reached for tier " + seeker.getTrustTier());
         }
 

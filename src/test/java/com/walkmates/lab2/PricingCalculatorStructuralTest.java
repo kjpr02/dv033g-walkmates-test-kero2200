@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Lab 2, Part A — structural testing for {@link PricingCalculator} (FR-4.3).
@@ -48,4 +49,56 @@ class PricingCalculatorStructuralTest {
     // TODO (branch): a clearly-overnight booking (e.g. 600 min) includes the 20% surcharge.
     // TODO (BOUNDARY — this is the interesting one): a booking of exactly 480 minutes must NOT
     //      be surcharged (FR-4.3 says strictly > 480). Write this test and see what happens.
+
+    @Test
+    @DisplayName("Shelter volunteering is free even for a long booking")
+    void shelterVolunteerIsFree() {
+        Booking booking = new Booking("seeker-1", "listing-1", 600);
+
+        double price = pricing.priceFor(booking, listing(ListingType.SHELTER_VOLUNTEER), seeker(TrustTier.VERIFIED));
+
+        assertThat(price).isEqualTo(0.00);
+    }
+
+    @Test
+    @DisplayName("600-minute booking includes the 20% overnight surcharge")
+    void overnightBookingIncludesSurcharge() {
+        Booking booking = new Booking("seeker-1", "listing-1", 600);
+
+        double price = pricing.priceFor(booking, listing(ListingType.DOG_WALK), seeker(TrustTier.VERIFIED));
+
+        assertThat(price).isEqualTo(1075.20);
+    }
+
+    @Test
+    void nullBookingIsRejected() {
+        assertThatThrownBy(() -> pricing.priceFor(null, listing(ListingType.DOG_WALK),
+                seeker(TrustTier.VERIFIED))).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void nullListingIsRejected() {
+        Booking booking = new Booking("seeker-1", "listing-1", 60);
+
+        assertThatThrownBy(() -> pricing.priceFor(booking, null, seeker(TrustTier.VERIFIED)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void nullSeekerIsRejected() {
+        Booking booking = new Booking("seeker-1", "listing-1", 60);
+
+        assertThatThrownBy(() -> pricing.priceFor(booking, listing(ListingType.DOG_WALK), null))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    @DisplayName("Exactly 480 minutes does not incur an overnight surcharge")
+    void exactly480MinutesHasNoSurcharge() {
+        Booking booking = new Booking("seeker-1", "listing-1", 480);
+
+        double price = pricing.priceFor(booking, listing(ListingType.DOG_WALK), seeker(TrustTier.VERIFIED));
+
+        assertThat(price).isEqualTo(716.80);
+    }
 }

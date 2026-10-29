@@ -46,7 +46,7 @@ public class PricingCalculator {
 
         double overnightExtra = 0.0;
         // Long bookings carry an overnight surcharge (FR-4.3).
-        if (booking.getDurationMinutes() >= OVERNIGHT_THRESHOLD_MINUTES) {
+        if (booking.getDurationMinutes() > OVERNIGHT_THRESHOLD_MINUTES) {
             overnightExtra = baseCost * OVERNIGHT_SURCHARGE_RATE;
         }
 
